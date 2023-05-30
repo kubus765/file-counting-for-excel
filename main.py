@@ -99,11 +99,13 @@ def get_serial_number(file_name):
 # Display a message prompting the user to select the current spreadsheet
 print("Please select the current spreadsheet.")
 
-# Prompt user to select the Excel file
+# Prompt user to select the Excel file, exit if no file is selected
 root = Tk()
 root.withdraw()
 excel_file_path = askopenfilename(filetypes=[("Excel Files", "*.xlsx")])
-root.destroy()
+if not excel_file_path:
+    print("No Excel file selected. Exiting...")
+    exit()
 
 # Monitor a directory for new text files
 directory_path = 'text_files'
