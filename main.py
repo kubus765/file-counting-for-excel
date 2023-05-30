@@ -24,7 +24,7 @@ def update_excel(file_path):
         return
 
     # Attempt to open the Excel spreadsheet with retry logic
-    max_retries = 999
+    max_retries = 9999
     retries = 0
     while retries < max_retries:
         try:
