@@ -15,10 +15,31 @@ def update_excel(file_path):
         # Add more conditions as needed
     }
 
-    # Load the Excel spreadsheet
-    workbook = openpyxl.load_workbook('data.xlsx')
-    worksheet = workbook.active
 
+        # Attempt to open the Excel spreadsheet with retry logic
+
+    max_retries = 999
+
+    retries = 0
+
+    while retries < max_retries:
+
+        try:
+
+            workbook = openpyxl.load_workbook('your_spreadsheet.xlsx')
+
+            break
+
+        except Exception as e:
+
+            print(f"Error opening the Excel file: {e}")
+
+            print("Retrying...")
+
+            retries += 1
+
+            time.sleep(15)  # Delay before retrying
+    
     # Check if the condition exists in the file name and the file content contains "PASS"
     for condition, position in conditions.items():
         if condition in content and 'PASS' in open(file_path).read():
