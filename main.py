@@ -111,6 +111,9 @@ start_time = time.time()
 processed_files = set()
 processed_serial_numbers = set()
 
+# Display a message after loading the file
+print("File loaded:", excel_file_path)
+
 while True:
     scan_directory(directory_path)
 
