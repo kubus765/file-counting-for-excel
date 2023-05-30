@@ -33,11 +33,11 @@ def update_excel(file_path):
         except Exception as e:
             print(f"Error opening the Excel file: {e}")
             print(" ")
-            print("Retrying, sleep 15 seconds...")
+            print("Retrying, sleep 10 seconds...")
             print("Please save and close the document!")
             print(" ")
             retries += 1
-            time.sleep(15)  # Delay before retrying
+            time.sleep(10)  # Delay before retrying
 
     # Check if the maximum number of retries has been reached
     if retries == max_retries:
@@ -64,11 +64,11 @@ def update_excel(file_path):
         except Exception as e:
             print(f"Error saving the Excel file: {e}")
             print(" ")
-            print("Retrying, sleep 15 seconds...")
+            print("Retrying, sleep 10 seconds...")
             print("Please save and close the document!")
             print(" ")
             retries += 1
-            time.sleep(15)  # Delay before retrying
+            time.sleep(10)  # Delay before retrying
 
     # Check if the maximum number of retries has been reached
     if retries == max_retries:
