@@ -96,6 +96,9 @@ def get_serial_number(file_name):
     serial_number = file_name.split('_')[1]
     return serial_number
 
+# Display a message prompting the user to select the current spreadsheet
+print("Please select the current spreadsheet.")
+
 # Prompt user to select the Excel file
 root = Tk()
 root.withdraw()
