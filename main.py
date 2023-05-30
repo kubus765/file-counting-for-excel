@@ -113,6 +113,7 @@ processed_serial_numbers = set()
 
 # Display a message after loading the file
 print("File loaded:", excel_file_path)
+print(" ")
 
 while True:
     scan_directory(directory_path)
