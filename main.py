@@ -1,7 +1,8 @@
 import os
 import openpyxl
 import time
-from tkinter import Tk, Checkbutton, IntVar, messagebox
+import sys
+from tkinter import Tk, Checkbutton, Text
 from tkinter.filedialog import askopenfilename
 import threading
 import datetime
@@ -22,7 +23,7 @@ def update_excel(file_path):
     # Check if the serial number has been processed already
     serial_number = get_serial_number(file_name)
     if serial_number in processed_serial_numbers:
-        print(f"Serial number {serial_number} has already been processed. Skipping file.")
+        print_to_console(f"Serial number {serial_number} has already been processed. Skipping file.")
         return
 
     # Attempt to open the Excel spreadsheet with retry logic
@@ -33,17 +34,17 @@ def update_excel(file_path):
             workbook = openpyxl.load_workbook(excel_file_path)
             break
         except Exception as e:
-            print(f"Error opening the Excel file: {e}")
-            print(" ")
-            print("Retrying, sleep 10 seconds...")
-            print("Please save and close the document!")
-            print(" ")
+            print_to_console(f"Error opening the Excel file: {e}")
+            print_to_console(" ")
+            print_to_console("Retrying, sleep 10 seconds...")
+            print_to_console("Please save and close the document!")
+            print_to_console(" ")
             retries += 1
             time.sleep(10)  # Delay before retrying
 
     # Check if the maximum number of retries has been reached
     if retries == max_retries:
-        print("Unable to open the Excel file. Exiting...")
+        print_to_console("Unable to open the Excel file. Exiting...")
         return
     
     worksheet = workbook.active
@@ -64,17 +65,17 @@ def update_excel(file_path):
             workbook.save(excel_file_path)
             break
         except Exception as e:
-            print(f"Error saving the Excel file: {e}")
-            print(" ")
-            print("Retrying, sleep 10 seconds...")
-            print("Please save and close the document!")
-            print(" ")
+            print_to_console(f"Error saving the Excel file: {e}")
+            print_to_console(" ")
+            print_to_console("Retrying, sleep 10 seconds...")
+            print_to_console("Please save and close the document!")
+            print_to_console(" ")
             retries += 1
             time.sleep(10)  # Delay before retrying
 
     # Check if the maximum number of retries has been reached
     if retries == max_retries:
-        print("Unable to save the Excel file. Exiting...")
+        print_to_console("Unable to save the Excel file. Exiting...")
         return
 
     # Add the serial number to the processed serial numbers set
@@ -82,16 +83,18 @@ def update_excel(file_path):
     
 # Recursive function to scan all folders within the directory for new text files
 def scan_directory():
-    while not service_mode_enabled:
-        for root, dirs, files in os.walk(directory_path):
-            for file in files:
-                if file.endswith('.txt'):
-                    file_path = os.path.join(root, file)
-                    modified_time = os.path.getmtime(file_path)
-                    if modified_time > start_time and file_path not in processed_files:
-                        update_excel(file_path)
-                        processed_files.add(file_path)
-                        print(f"Processed {file_path}.")
+    while True:
+        if not service_mode_enabled:
+            for root, dirs, files in os.walk(directory_path):
+                for file in files:
+                    if file.endswith('.txt'):
+                        file_path = os.path.join(root, file)
+                        modified_time = os.path.getmtime(file_path)
+                        if modified_time > start_time and file_path not in processed_files:
+                            update_excel(file_path)
+                            processed_files.add(file_path)
+                            print_to_console(f"Processed {file_path}.")
+
 
         # Add a delay before checking for new files again
         time.sleep(10)  # Delay of 10 seconds
@@ -107,23 +110,25 @@ def toggle_service_mode():
     global service_mode_enabled, start_time
 
     if service_mode_enabled:
-        messagebox.showinfo("Service Mode", "Service Mode is deactivated. Script will resume.")
         service_mode_enabled = False
         start_time = time.time()  # Refresh the start time when Service Mode is disabled
-        print_unpause_message()
+        print_to_console_unpause_message()
     else:
-        messagebox.showinfo("Service Mode", "Service Mode is activated. Script is paused.")
         service_mode_enabled = True
-        print_pause_message()
+        print_to_console_pause_message()
 
-def print_pause_message():
+def print_to_console_pause_message():
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"Script paused at {current_time}.")
+    print_to_console(f"Script paused at {current_time}.")
 
-def print_unpause_message():
+def print_to_console_unpause_message():
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"Script unpaused at {current_time}. Timestamp refreshed.")
+    print_to_console(f"Script unpaused at {current_time}. Timestamp refreshed.")
 
+def print_to_console(message):
+    console_text.config(state='normal')  # Enable editing the console
+    console_text.insert('end', message + '\n')  # Append the message to the console
+    console_text.config(state='disabled')  # Disable editing the console
 
 # Display a message prompting the user to select the current spreadsheet
 print("Please select the current spreadsheet.")
@@ -149,14 +154,17 @@ print(" ")
 
 # Create the main window
 window = Tk()
-window.title("Service Mode")
-window.geometry("200x30")
+window.title("Test Counter App")
+window.geometry("600x300")
 window.resizable(False, False)
-window.overrideredirect(1)
+
+# Console Text widget
+console_text = Text(window, state='disabled', height=15)
+console_text.pack(fill='both', expand=True, padx=10, pady=10)
 
 # Service Mode checkbox
 service_mode_checkbox = Checkbutton(window, text="Service Mode", command=toggle_service_mode)
-service_mode_checkbox.pack()
+service_mode_checkbox.pack(side='top', anchor='w')
 
 # Start a thread to continuously scan the directory for new files
 scan_thread = threading.Thread(target=scan_directory)
