@@ -1,8 +1,10 @@
 import os
 import openpyxl
 import time
-from tkinter import Tk
+from tkinter import Tk, Checkbutton, IntVar, messagebox
 from tkinter.filedialog import askopenfilename
+import threading
+import datetime
 
 def update_excel(file_path):
     # Extract the relevant information from the file name
@@ -79,22 +81,49 @@ def update_excel(file_path):
     processed_serial_numbers.add(serial_number)
     
 # Recursive function to scan all folders within the directory for new text files
-def scan_directory(directory_path):
-    for root, dirs, files in os.walk(directory_path):
-        for file in files:
-            if file.endswith('.txt'):
-                file_path = os.path.join(root, file)
-                modified_time = os.path.getmtime(file_path)
-                if modified_time > start_time and file_path not in processed_files:
-                    update_excel(file_path)
-                    processed_files.add(file_path)
-                    print(f"Processed {file_path}.")
-                    
+def scan_directory():
+    while not service_mode_enabled:
+        for root, dirs, files in os.walk(directory_path):
+            for file in files:
+                if file.endswith('.txt'):
+                    file_path = os.path.join(root, file)
+                    modified_time = os.path.getmtime(file_path)
+                    if modified_time > start_time and file_path not in processed_files:
+                        update_excel(file_path)
+                        processed_files.add(file_path)
+                        print(f"Processed {file_path}.")
+
+        # Add a delay before checking for new files again
+        time.sleep(10)  # Delay of 10 seconds
+
 # Extract the serial number from the file name
 def get_serial_number(file_name):
     # Modify this function based on the format of the serial number in the file name
     serial_number = file_name.split('_')[1]
     return serial_number
+
+# Service mode checkbox toggle
+def toggle_service_mode():
+    global service_mode_enabled, start_time
+
+    if service_mode_enabled:
+        messagebox.showinfo("Service Mode", "Service Mode is deactivated. Script will resume.")
+        service_mode_enabled = False
+        start_time = time.time()  # Refresh the start time when Service Mode is disabled
+        print_unpause_message()
+    else:
+        messagebox.showinfo("Service Mode", "Service Mode is activated. Script is paused.")
+        service_mode_enabled = True
+        print_pause_message()
+
+def print_pause_message():
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"Script paused at {current_time}.")
+
+def print_unpause_message():
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"Script unpaused at {current_time}. Timestamp refreshed.")
+
 
 # Display a message prompting the user to select the current spreadsheet
 print("Please select the current spreadsheet.")
@@ -112,13 +141,26 @@ directory_path = 'text_files'
 start_time = time.time()
 processed_files = set()
 processed_serial_numbers = set()
+service_mode_enabled = False
 
 # Display a message after loading the file
 print("File loaded:", excel_file_path)
 print(" ")
 
-while True:
-    scan_directory(directory_path)
+# Create the main window
+window = Tk()
+window.title("Service Mode")
+window.geometry("200x30")
+window.resizable(False, False)
+window.overrideredirect(1)
 
-    # Add a delay before checking for new files again
-    time.sleep(10)  # Delay of 1 second
+# Service Mode checkbox
+service_mode_checkbox = Checkbutton(window, text="Service Mode", command=toggle_service_mode)
+service_mode_checkbox.pack()
+
+# Start a thread to continuously scan the directory for new files
+scan_thread = threading.Thread(target=scan_directory)
+scan_thread.start()
+
+# Start the Tkinter event loop
+window.mainloop()
