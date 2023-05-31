@@ -2,7 +2,7 @@ import os
 import openpyxl
 import time
 import sys
-from tkinter import Tk, Checkbutton, Text
+from tkinter import Tk, Checkbutton, Text, Label
 from tkinter.filedialog import askopenfilename
 import threading
 import datetime
@@ -163,20 +163,30 @@ try:
     # Display a message after loading the file
     print("File loaded:", excel_file_path)
     print(" ")
-
+    
+    # Function to create the "made by JAD" label
+    def create_made_by_label():
+        made_by_label = Label(window, text="Made by JAD", anchor='se', justify='right')
+        made_by_label.pack(side='bottom', anchor='se', padx=10, pady=1)
+        
     # Create the main window
     window = Tk()
-    window.title("Test Counter App")
+    window.title("Spreadsheet Updater")
     window.geometry("600x300")
     window.resizable(False, False)
     window.protocol("WM_DELETE_WINDOW", on_window_close)
+    create_made_by_label()
+    
+        # Service Mode checkbox
+    service_mode_checkbox = Checkbutton(window, text="Service Mode", command=toggle_service_mode)
+    service_mode_checkbox.pack(side='top', anchor='w')
     # Console Text widget
     console_text = Text(window, state='disabled', height=15)
     console_text.pack(fill='both', expand=True, padx=10, pady=10)
 
     # Service Mode checkbox
     service_mode_checkbox = Checkbutton(window, text="Service Mode", command=toggle_service_mode)
-    service_mode_checkbox.pack(side='top', anchor='w')
+    service_mode_checkbox.pack(side='top', anchor='w', padx=10, pady=10)
 
     # Start a thread to continuously scan the directory for new files
     scan_thread = threading.Thread(target=scan_directory)
