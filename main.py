@@ -163,8 +163,8 @@ try:
     # Display a message after loading the file
     print("File loaded:", excel_file_path)
     print(" ")
-    
-    # Function to create the "made by JAD" label
+
+    # Copyright label ;)
     def create_made_by_label():
         made_by_label = Label(window, text="Made by JAD", anchor='se', justify='right')
         made_by_label.pack(side='bottom', anchor='se', padx=10, pady=1)
@@ -177,7 +177,7 @@ try:
     window.protocol("WM_DELETE_WINDOW", on_window_close)
     create_made_by_label()
     
-        # Service Mode checkbox
+    # Service Mode checkbox
     service_mode_checkbox = Checkbutton(window, text="Service Mode", command=toggle_service_mode)
     service_mode_checkbox.pack(side='top', anchor='w')
     # Console Text widget
