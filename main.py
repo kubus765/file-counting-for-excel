@@ -9,7 +9,7 @@ import datetime
 
 def on_window_close():
     print_to_console("Closing")
-    time.sleep(1)
+    time.sleep(0.1)
     window.destroy()
     os._exit(1)
     
