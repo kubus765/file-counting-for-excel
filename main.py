@@ -7,6 +7,12 @@ from tkinter.filedialog import askopenfilename
 import threading
 import datetime
 
+def on_window_close():
+    print_to_console("Closing")
+    time.sleep(1)
+    window.destroy()
+    os._exit(1)
+    
 def update_excel(file_path):
     # Extract the relevant information from the file name
     file_name = os.path.basename(file_path)
@@ -81,6 +87,7 @@ def update_excel(file_path):
     # Add the serial number to the processed serial numbers set
     processed_serial_numbers.add(serial_number)
     
+running = True
 # Recursive function to scan all folders within the directory for new text files
 def scan_directory():
     while True:
@@ -104,6 +111,8 @@ def get_serial_number(file_name):
     # Modify this function based on the format of the serial number in the file name
     serial_number = file_name.split('_')[1]
     return serial_number
+
+
 
 # Service mode checkbox toggle
 def toggle_service_mode():
@@ -130,45 +139,52 @@ def print_to_console(message):
     console_text.insert('end', message + '\n')  # Append the message to the console
     console_text.config(state='disabled')  # Disable editing the console
 
-# Display a message prompting the user to select the current spreadsheet
-print("Please select the current spreadsheet.")
 
-# Prompt user to select the Excel file, exit if no file is selected
-root = Tk()
-root.withdraw()
-excel_file_path = askopenfilename(filetypes=[("Excel Files", "*.xlsx")])
-if not excel_file_path:
-    print("No Excel file selected. Exiting...")
-    exit()
+try:
+    # Display a message prompting the user to select the current spreadsheet
+    print("Please choose the current spreadsheet.")
 
-# Monitor a directory for new text files
-directory_path = 'text_files'
-start_time = time.time()
-processed_files = set()
-processed_serial_numbers = set()
-service_mode_enabled = False
+    # Prompt user to select the Excel file, exit if no file is selected
+    root = Tk()
+    root.withdraw()
+    root.title("Please choose the current spreadsheet")
+    excel_file_path = askopenfilename(filetypes=[("Excel Files", "*.xlsx")])
+    if not excel_file_path:
+        print("No Excel file selected. Exiting...")
+        sys.exit()
 
-# Display a message after loading the file
-print("File loaded:", excel_file_path)
-print(" ")
+    # Monitor a directory for new text files
+    directory_path = 'text_files'
+    start_time = time.time()
+    processed_files = set()
+    processed_serial_numbers = set()
+    service_mode_enabled = False
 
-# Create the main window
-window = Tk()
-window.title("Test Counter App")
-window.geometry("600x300")
-window.resizable(False, False)
+    # Display a message after loading the file
+    print("File loaded:", excel_file_path)
+    print(" ")
 
-# Console Text widget
-console_text = Text(window, state='disabled', height=15)
-console_text.pack(fill='both', expand=True, padx=10, pady=10)
+    # Create the main window
+    window = Tk()
+    window.title("Test Counter App")
+    window.geometry("600x300")
+    window.resizable(False, False)
+    window.protocol("WM_DELETE_WINDOW", on_window_close)
+    # Console Text widget
+    console_text = Text(window, state='disabled', height=15)
+    console_text.pack(fill='both', expand=True, padx=10, pady=10)
 
-# Service Mode checkbox
-service_mode_checkbox = Checkbutton(window, text="Service Mode", command=toggle_service_mode)
-service_mode_checkbox.pack(side='top', anchor='w')
+    # Service Mode checkbox
+    service_mode_checkbox = Checkbutton(window, text="Service Mode", command=toggle_service_mode)
+    service_mode_checkbox.pack(side='top', anchor='w')
 
-# Start a thread to continuously scan the directory for new files
-scan_thread = threading.Thread(target=scan_directory)
-scan_thread.start()
+    # Start a thread to continuously scan the directory for new files
+    scan_thread = threading.Thread(target=scan_directory)
+    scan_thread.start()
 
-# Start the Tkinter event loop
-window.mainloop()
+    # Start the Tkinter event loop
+    window.mainloop()
+
+except Exception as e:
+    print(f"An error occurred: {e}")
+
